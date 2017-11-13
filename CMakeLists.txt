@@ -1,0 +1,31 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(mirim C)
+INCLUDE(GenerateExportHeader)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+FIND_PACKAGE(argp)
+
+SET(MR_SRCS error.c file.c scanner.c)
+SET(MR_HDRS error.h file.h scanner.h)
+
+FOREACH(SRC ${MR_SRCS})
+  LIST(APPEND MR_SRCS_ABS src/core/${SRC})
+ENDFOREACH()
+FOREACH(HDR ${MR_HDRS})
+  LIST(APPEND MR_HDRS_ABS include/mr/${HDR})
+ENDFOREACH()
+
+INCLUDE_DIRECTORIES(include)
+
+ADD_LIBRARY(mr_core SHARED ${MR_SRCS_ABS} ${MR_HDRS_ABS})
+GENERATE_EXPORT_HEADER(mr_core           
+	BASE_NAME mr_core
+	EXPORT_MACRO_NAME MR_EXPORTS
+	EXPORT_FILE_NAME exports.h
+	STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC)
+
+ADD_EXECUTABLE(mr src/core/compiler.c)
+TARGET_LINK_LIBRARIES(mr mr_core)
+
+add_custom_command(TARGET mr PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/rsc ${CMAKE_BINARY_DIR})
