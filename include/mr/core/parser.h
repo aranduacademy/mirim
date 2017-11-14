@@ -21,12 +21,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <mr/core.h>
-#include <stdlib.h>
 
-MRError*
-mr_error_new(const char* message) {
-  MRError* error = (MRError*) malloc(sizeof(MRError));
-  error->message = message;
-  return error;
-}
+#if !defined(MR_CORE_H_INSIDE)
+#error "Only <mr/core.h> can be included directly."
+#endif
+#ifndef MR_PARSER_H
+#define MR_PARSER_H
+#endif // !MR_PARSER_H

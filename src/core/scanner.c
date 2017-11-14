@@ -1,5 +1,27 @@
-#include <mr/scanner.h>
-#include <mr/file.h>
+/*
+ * This file is part of the Mirim project.
+ *
+ * Copyright 2018 Arandu Academy
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files(the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions :
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
+#include <mr/core.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -22,33 +44,20 @@ typedef enum State {
   ST_LITERAL_ESCAPE,
 } State;
 
-typedef enum MRTokenType {
-  TK_ID,
-  TK_LEG,
-  TK_EG,
-  TK_LE,
-  TK_LITERAL,
-  TK_BLK_OPEN,
-  TK_BLK_CLOSE
-} MRTokenType;
-
-typedef struct MRToken {
-  char* start;
-  char* end;
-  MRTokenType type;
-} MRToken;
-
-void MR_EXPORTS
-mr_parser_scan(const char* contents, MRError** error) {
+MR_EXPORTS MRToken*
+mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
   char*    curp = (char*)contents;
-  char     cur;
   char*    start = curp;
+	char*    rowStart = start;
   MRToken* tokens = malloc(sizeof(MRToken) * 256);
   uint16_t curToken = 0;
-  uint8_t  state = 0;
+	uint16_t row = 0;
   uint8_t  levels[32];
+  uint8_t  state = 0;
   uint8_t  levelIndex = 0;
   uint8_t  length;
+  char     cur;
+	char     errorMessage[128];
   memset(levels, 0, 32);
 	while (cur = *curp) {
 		switch (state) {
@@ -56,25 +65,34 @@ mr_parser_scan(const char* contents, MRError** error) {
       switch(cur) {
       case ' ':
         break;
-      case '{':
-        TOKEN_ADD(tokens, curToken, start, curp, TK_BLK_OPEN);
-        state = ST_START;
-        break;
-      case '}':
-        TOKEN_ADD(tokens, curToken, start, curp, TK_BLK_CLOSE);
-        state = ST_START;
-        break;
-      case '\n':
+      case '(':
+			case ')':
+			case '[':
+			case ']':
+			case '*':
+			case '/':
+			case '-':
+			case '+':
+			case '{':
+			case '}':
+				TOKEN_ADD(tokens, curToken, start, curp, cur);
+				state = ST_START;
+				break;
+			case '\n':
+				row++;
         start = curp;
+				rowStart = start;
+				// Advance to non-space character or end-of-line
         do curp++; while (*curp == ' ');
         if(*curp != '\n'){
-          length = curp-start-1;
+          length = (uint8_t)(curp-start-1);
+					// Is a child?
           if(length > levels[levelIndex]) {
             levels[++levelIndex] = length;
-            TOKEN_ADD(tokens, curToken, start, curp, TK_BLK_OPEN);
-          } else while(length < levels[levelIndex]) {
+            TOKEN_ADD(tokens, curToken, start, curp, '{');
+          } else while(length < levels[levelIndex]) { // Not a child
             --levelIndex;
-            TOKEN_ADD(tokens, curToken, start, curp, TK_BLK_CLOSE);
+            TOKEN_ADD(tokens, curToken, start, curp, '}');
           }
         } else curp--;
         break;
@@ -95,9 +113,10 @@ mr_parser_scan(const char* contents, MRError** error) {
           state = ST_ID;
           start = curp;
         } else {
-          *error = mr_error_new("Expected letter");
+					sprintf(errorMessage, "Unexpected character in (%d,%d): ", row, curp-rowStart);
+          *error = mr_error_new(errorMessage);
           free(tokens);
-          return;
+          return NULL;
         }
         break;
       }
@@ -151,17 +170,27 @@ mr_parser_scan(const char* contents, MRError** error) {
         state = ST_LITERAL_START;
       }
       break;
+		default:
+			
+			break;
 		}
 		printf("%c", cur);
 		curp++;
 	}
+	*nTokens = curToken;
+	return tokens;
 }
 
-MR_EXPORTS
-void mr_parser_scan_file(const char* filename, MRError** error) {
+MR_EXPORTS MRToken*
+mr_scanner_scan_file(const char* filename, uint16_t *nTokens, MRError** error) {
+	// Read source code from file
 	char* contents = mr_file_read(filename, error);
+	// Get tokens
+	MRToken* tokens = NULL;
 	if (!error || !(*error))
-		mr_parser_scan(contents, error);
-	free(contents);
-}
+		tokens = mr_scanner_scan(contents, nTokens, error);
 
+	// Clean and return
+	free(contents);
+	return tokens;
+}

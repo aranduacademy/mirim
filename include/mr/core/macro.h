@@ -21,12 +21,18 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <mr/core.h>
-#include <stdlib.h>
 
-MRError*
-mr_error_new(const char* message) {
-  MRError* error = (MRError*) malloc(sizeof(MRError));
-  error->message = message;
-  return error;
-}
+#ifndef MR_MACRO_H
+#define MR_MACRO_H
+
+#define _CRT_SECURE_NO_DEPRECATE
+
+#ifndef NULL
+#  ifdef __cplusplus
+#  define NULL        (0L)
+#  else /* !__cplusplus */
+#  define NULL        ((void*) 0)
+#  endif /* !__cplusplus */
+#endif
+
+#endif // MR_MACRO

@@ -21,12 +21,17 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <mr/core.h>
-#include <stdlib.h>
+
+#ifndef MR_ERROR_H
+#define MR_ERROR_H
+#include<stdint.h>
+#include<mr/exports.h>
+typedef struct MRError
+{
+  const char* message;
+} MRError;
 
 MRError*
-mr_error_new(const char* message) {
-  MRError* error = (MRError*) malloc(sizeof(MRError));
-  error->message = message;
-  return error;
-}
+mr_error_new(const char *message);
+
+#endif // !MR_ERROR_H

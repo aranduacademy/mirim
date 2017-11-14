@@ -21,12 +21,31 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <mr/core.h>
-#include <stdlib.h>
+#ifndef MR_CORE_H
+#define MR_CORE_H
 
-MRError*
-mr_error_new(const char* message) {
-  MRError* error = (MRError*) malloc(sizeof(MRError));
-  error->message = message;
-  return error;
-}
+#define MR_CORE_H_INSIDE
+
+#ifndef MR_MACRO_H
+#include <mr/core/macro.h>
+#endif // !MR_MACRO_H
+
+#ifndef MR_ERROR_H
+#include <mr/core/error.h>
+#endif // !MR_ERROR_H
+
+#ifndef MR_FILE_H
+#include <mr/core/file.h>
+#endif // !MR_FILE_H
+
+#ifndef MR_SCANNER_H
+#include <mr/core/scanner.h>
+#endif // !MR_SCANNER_H
+
+#ifndef MR_PARSER_H
+#include <mr/core/parser.h>
+#endif // !MR_PARSER_H
+
+#undef MR_CORE_H_INSIDE
+
+#endif // !MR_CORE_H

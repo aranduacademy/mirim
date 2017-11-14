@@ -4,14 +4,14 @@ INCLUDE(GenerateExportHeader)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 FIND_PACKAGE(argp)
 
-SET(MR_SRCS error.c file.c scanner.c)
-SET(MR_HDRS macro.h error.h file.h scanner.h)
+SET(MR_SRCS error.c file.c scanner.c parser.c)
+SET(MR_HDRS macro.h error.h file.h scanner.h parser.h)
 
 FOREACH(SRC ${MR_SRCS})
   LIST(APPEND MR_SRCS_ABS src/core/${SRC})
 ENDFOREACH()
 FOREACH(HDR ${MR_HDRS})
-  LIST(APPEND MR_HDRS_ABS include/mr/${HDR})
+  LIST(APPEND MR_HDRS_ABS include/mr/core/${HDR})
 ENDFOREACH()
 
 INCLUDE_DIRECTORIES(include)
@@ -26,6 +26,6 @@ GENERATE_EXPORT_HEADER(mr_core
 ADD_EXECUTABLE(mr src/core/compiler.c)
 TARGET_LINK_LIBRARIES(mr mr_core)
 
-add_custom_command(TARGET mr PRE_BUILD
+ADD_CUSTOM_COMMAND(TARGET mr PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                        ${CMAKE_SOURCE_DIR}/rsc ${CMAKE_BINARY_DIR})
