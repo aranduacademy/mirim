@@ -1,11 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(mirim C)
+PROJECT(mirim)
 INCLUDE(GenerateExportHeader)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 FIND_PACKAGE(argp)
 
 SET(MR_SRCS error.c file.c scanner.c)
-SET(MR_HDRS error.h file.h scanner.h)
+SET(MR_HDRS macro.h error.h file.h scanner.h)
 
 FOREACH(SRC ${MR_SRCS})
   LIST(APPEND MR_SRCS_ABS src/core/${SRC})

@@ -2,6 +2,7 @@
 #ifndef MR_EXPORTS_H
 #define MR_EXPORTS_H
 
+#ifdef _MSC_VER
 #ifdef SHARED_EXPORTS_BUILT_AS_STATIC
 #  define MR_EXPORTS
 #  define MR_CORE_NO_EXPORT
@@ -17,7 +18,7 @@
 #  endif
 
 #  ifndef MR_CORE_NO_EXPORT
-#    define MR_CORE_NO_EXPORT 
+#    define MR_CORE_NO_EXPORT
 #  endif
 #endif
 
@@ -38,5 +39,9 @@
 #    define MR_CORE_NO_DEPRECATED
 #  endif
 #endif
+#else
+# define MR_EXPORTS
+#endif
+
 
 #endif

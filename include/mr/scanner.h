@@ -6,7 +6,7 @@
 /**
  * Scan file and generate the token
  */
-void MR_EXPORTS
+MR_EXPORTS void
 mr_parser_scan_file(const char* filename, MRError** error);
 
 /**

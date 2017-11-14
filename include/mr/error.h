@@ -4,10 +4,10 @@
 #include<mr/exports.h>
 typedef struct MRError
 {
-	char* message;
+  const char* message;
 } MRError;
 
 MRError*
-mr_error_new();
+mr_error_new(const char *message);
 
 #endif // !MR_ERROR

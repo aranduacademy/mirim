@@ -1,4 +1,4 @@
-#include <mr\scanner.h>
+#include <mr/scanner.h>
 #include <stdio.h>
 int main(int argc, char** argv) {
 	MRError* error = NULL;
