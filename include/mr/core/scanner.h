@@ -28,42 +28,23 @@
 #ifndef MR_SCANNER_H
 #define MR_SCANNER_H
 
-#include<mr/core/error.h>
-
-/**
- * Type of some complex tokens. 
- */
-typedef enum MRTokenType {
-	TK_ID,
-	TK_LEG,
-	TK_EG,
-	TK_LE,
-	TK_LITERAL,
-} MRTokenType;
-
-/**
- * Info about a single token
- */
-typedef struct MRToken {
-	char* start;
-	char* end;
-	MRTokenType type;
-} MRToken;
+#include <mr/core/error.h>
+#include <mr/core/token.h>
 
 /**
  * Scan file and generate the token
  * @param filename name of source code file
  * @param error NULL if there is no error in scanning
  */
-MR_EXPORTS MRToken*
-mr_scanner_scan_file(const char* filename, uint16_t *nTokens, MRError** error);
+MR_EXPORTS MrToken*
+mr_scanner_scan_file(const char* filename, uint16_t *nTokens, MrError** error);
 
 /**
  * Scan text and return list of tokens
  * @param source code
  * @param error NULL if there is no error in scanning
  */
-MR_EXPORTS MRToken*
-mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error);
+MR_EXPORTS MrToken*
+mr_scanner_scan(const char* contents, uint16_t *nTokens, MrError** error);
 
 #endif // !MR_SCANNER_H

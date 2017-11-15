@@ -23,16 +23,18 @@
  */
 #include <mr/core.h>
 #include <stdio.h>
+#include <stdlib.h>
 int main(int argc, char** argv) {
-	MRError* error = NULL;
+  MrError* error = NULL;
 	uint16_t nTokens;
 	uint16_t i;
 	// Get tokens from file
-	MRToken* tokens = mr_scanner_scan_file("test.mr", &nTokens, &error);
+  MrToken* tokens = mr_scanner_scan_file("test.mr", &nTokens, &error);
 
 	// Print error
 	if (error) {
 		fprintf(stderr, "Error: %s\n", error->message);
+    return EXIT_FAILURE;
 	}
 
 	// Print tokens
@@ -43,7 +45,7 @@ int main(int argc, char** argv) {
 		case TK_LE: printf(" <= "); break;
 		case TK_ID: printf(" ID "); break;
 		case TK_LITERAL: printf(" LITERAL "); break;
-		default: printf(" %c ", *tokens[i].start); break;
+    default: printf(" %c ", tokens[i].type); break;
 		}
 	}
 

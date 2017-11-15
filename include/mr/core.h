@@ -38,6 +38,10 @@
 #include <mr/core/file.h>
 #endif // !MR_FILE_H
 
+#ifndef MR_TOKEN_H
+#include <mr/core/token.h>
+#endif // !MR_TOKEN_H
+
 #ifndef MR_SCANNER_H
 #include <mr/core/scanner.h>
 #endif // !MR_SCANNER_H

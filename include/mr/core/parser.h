@@ -27,4 +27,11 @@
 #endif
 #ifndef MR_PARSER_H
 #define MR_PARSER_H
+
+#include <mr/core/error.h>
+#include <mr/core/token.h>
+
+MR_EXPORTS void
+mr_parser_parse(MrToken* tokens, MrError** error);
+
 #endif // !MR_PARSER_H

@@ -21,25 +21,41 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <mr/core.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-char*
-mr_file_read(const char* filename, MrError** error) {
-	FILE *f = fopen(filename, "rb");
-	if (f) {
-		fseek(f, 0, SEEK_END);
-		long fsize = ftell(f);
-		fseek(f, 0, SEEK_SET);  //same as rewind(f);
 
-		char *string = malloc(fsize + 1);
-		fread(string, fsize, 1, f);
-		fclose(f);
-		string[fsize] = 0;
-		return string;
-	}
-	else {
-		return NULL;
-	}
-}
+#if !defined(MR_CORE_H_INSIDE)
+#error "Only <mr/core.h> can be included directly."
+#endif
+#ifndef MR_TOKEN_H
+#define MR_TOKEN_H
+
+/**
+ * Type of some complex tokens.
+ */
+typedef enum MRTokenType {
+  TK_ID,
+  TK_LEG,
+  TK_EG,
+  TK_LE,
+  TK_LITERAL,
+} MRTokenType;
+
+/**
+ * Info about a single token
+ */
+typedef struct MrToken {
+  char* start;
+  char* end;
+  MRTokenType type;
+} MrToken;
+
+/**
+ * @brief Set token
+ * @param token
+ * @param start
+ * @param end
+ * @param type
+ */
+void
+mr_token_set(MrToken* token, char* start, char* end, MRTokenType type);
+
+#endif // !MR_TOKEN_H

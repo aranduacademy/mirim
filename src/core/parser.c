@@ -22,3 +22,8 @@
  * IN THE SOFTWARE.
  */
 #include <mr/core.h>
+
+MR_EXPORTS void
+mr_parser_parse(MrToken* tokens, MrError** error){
+
+}

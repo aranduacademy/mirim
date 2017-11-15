@@ -29,10 +29,6 @@
 #define IS_UPPER(x) (x >= 'A' && x <= 'Z')
 #define IS_LETTER(x) (IS_LOWER(x) || IS_UPPER(x))
 #define IS_DIGIT(x) (x >= '0' && x <= '9')
-#define TOKEN_ADD(list, i, s, e, t) \
-list[i].start = s; \
-list[i].end = e; \
-list[i++].type = t;
 
 typedef enum State {
 	ST_START,
@@ -44,21 +40,23 @@ typedef enum State {
   ST_LITERAL_ESCAPE,
 } State;
 
-MR_EXPORTS MRToken*
-mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
+MR_EXPORTS MrToken*
+mr_scanner_scan(const char* contents, uint16_t *nTokens, MrError** error) {
   char*    curp = (char*)contents;
   char*    start = curp;
 	char*    rowStart = start;
-  MRToken* tokens = malloc(sizeof(MRToken) * 256);
+  MrToken* tokens = malloc(sizeof(MrToken) * 256);
   uint16_t curToken = 0;
 	uint16_t row = 0;
   uint8_t  levels[32];
+  uint8_t  children[32];
   uint8_t  state = 0;
   uint8_t  levelIndex = 0;
   uint8_t  length;
   char     cur;
 	char     errorMessage[128];
   memset(levels, 0, 32);
+  memset(children, 0, 32);
 	while (cur = *curp) {
 		switch (state) {
 		case ST_START:
@@ -75,8 +73,8 @@ mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
 			case '+':
 			case '{':
 			case '}':
-				TOKEN_ADD(tokens, curToken, start, curp, cur);
-				state = ST_START;
+        mr_token_set(&tokens[curToken++], start, curp, cur);
+        state = ST_START;
 				break;
 			case '\n':
 				row++;
@@ -84,17 +82,27 @@ mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
 				rowStart = start;
 				// Advance to non-space character or end-of-line
         do curp++; while (*curp == ' ');
-        if(*curp != '\n'){
+        if(*curp != '\n' && *curp != '\0'){
           length = (uint8_t)(curp-start-1);
 					// Is a child?
           if(length > levels[levelIndex]) {
             levels[++levelIndex] = length;
-            TOKEN_ADD(tokens, curToken, start, curp, '{');
+            mr_token_set(&tokens[curToken++], start, curp, '{');
+            children[levelIndex]++;
+          } else if (length == levels[levelIndex]){
+            mr_token_set(&tokens[curToken++], start, curp, ';');
+            children[levelIndex]++;
           } else while(length < levels[levelIndex]) { // Not a child
+            if(children[levelIndex] == 0) {
+              curToken--;
+            } else {
+              mr_token_set(&tokens[curToken++], start, curp, '}');
+              children[levelIndex] = 0;
+            }
             --levelIndex;
-            TOKEN_ADD(tokens, curToken, start, curp, '}');
           }
-        } else curp--;
+        }
+        curp--;
         break;
       case '<':
         state = ST_LT;
@@ -122,19 +130,19 @@ mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
       }
       break;
 		case ST_ID:
-      if (!(IS_LETTER(cur) || cur == '-')) {
+      if (!(IS_LETTER(cur) || cur == '-' || IS_DIGIT(cur))) {
         curp--;
         // Generate ID token
-        TOKEN_ADD(tokens, curToken, start, curp, TK_ID);
+        mr_token_set(&tokens[curToken++], start, curp, TK_ID);
         state = ST_START;
       }
 			break;
     case ST_EQ:
       if(cur == '>'){
-        TOKEN_ADD(tokens, curToken, start, curp, TK_EG);
+        mr_token_set(&tokens[curToken++], start, curp, TK_EG);
         state = ST_START;
       } else {
-        TOKEN_ADD(tokens, curToken, start, curp, '=');
+        mr_token_set(&tokens[curToken++], start, curp, '=');
         state = ST_START;
         curp--;
       }
@@ -146,10 +154,10 @@ mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
       break;
     case ST_LQ:
       if(cur == '>'){
-        TOKEN_ADD(tokens, curToken, start, curp, TK_LEG);
+        mr_token_set(&tokens[curToken++], start, curp, TK_LEG);
         state = ST_START;
       } else {
-        TOKEN_ADD(tokens, curToken, start, curp, TK_LE);
+        mr_token_set(&tokens[curToken++], start, curp, TK_LE);
         state = ST_START;
         curp--;
       }
@@ -160,7 +168,7 @@ mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
         state = ST_LITERAL_ESCAPE;
         break;
       case '"':
-        TOKEN_ADD(tokens, curToken, start, curp, TK_LITERAL);
+        mr_token_set(&tokens[curToken++], start, curp, TK_LITERAL);
         state = ST_START;
         break;
       }
@@ -177,20 +185,26 @@ mr_scanner_scan(const char* contents, uint16_t *nTokens, MRError** error) {
 		printf("%c", cur);
 		curp++;
 	}
+  do {
+    if(children[levelIndex] == 0) {
+      curToken--;
+    } else {
+      mr_token_set(&tokens[curToken++], start, curp, '}');
+    }
+  } while(--levelIndex);
 	*nTokens = curToken;
 	return tokens;
 }
 
-MR_EXPORTS MRToken*
-mr_scanner_scan_file(const char* filename, uint16_t *nTokens, MRError** error) {
+MR_EXPORTS MrToken*
+mr_scanner_scan_file(const char* filename, uint16_t *nTokens, MrError** error) {
 	// Read source code from file
 	char* contents = mr_file_read(filename, error);
 	// Get tokens
-	MRToken* tokens = NULL;
+  MrToken* tokens = NULL;
 	if (!error || !(*error))
 		tokens = mr_scanner_scan(contents, nTokens, error);
 
-	// Clean and return
-	free(contents);
-	return tokens;
+  // return
+  return tokens;
 }

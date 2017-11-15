@@ -30,7 +30,7 @@
 
 #include <mr/core/error.h>
 
-char*
-mr_file_read(const char* filename, MRError** error);
+MR_EXPORTS char*
+mr_file_read(const char* filename, MrError** error);
 
 #endif // !MR_FILE_H

@@ -4,8 +4,8 @@ INCLUDE(GenerateExportHeader)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 FIND_PACKAGE(argp)
 
-SET(MR_SRCS error.c file.c scanner.c parser.c)
-SET(MR_HDRS macro.h error.h file.h scanner.h parser.h)
+SET(MR_SRCS error.c file.c token.c scanner.c ast.c parser.c)
+SET(MR_HDRS macro.h error.h file.h token.h scanner.h ast.h parser.h)
 
 FOREACH(SRC ${MR_SRCS})
   LIST(APPEND MR_SRCS_ABS src/core/${SRC})

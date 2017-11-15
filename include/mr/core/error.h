@@ -26,12 +26,13 @@
 #define MR_ERROR_H
 #include<stdint.h>
 #include<mr/exports.h>
-typedef struct MRError
+
+typedef struct MrError
 {
   const char* message;
-} MRError;
+} MrError;
 
-MRError*
+MR_EXPORTS MrError*
 mr_error_new(const char *message);
 
 #endif // !MR_ERROR_H

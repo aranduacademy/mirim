@@ -24,9 +24,9 @@
 #include <mr/core.h>
 #include <stdlib.h>
 
-MRError*
+MrError*
 mr_error_new(const char* message) {
-  MRError* error = (MRError*) malloc(sizeof(MRError));
+  MrError* error = (MrError*) malloc(sizeof(MrError));
   error->message = message;
   return error;
 }
